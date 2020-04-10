@@ -25,7 +25,7 @@ struct player_state {
 	Board r, n, b, q, k, p;
 };
 typedef struct player_state PlayerState;
-
+PlayerState player[2];
 enum _PlayerColor {WHITE=1, BLACK=0};
 typedef enum _PlayerColor PlayerColor;
 
@@ -43,16 +43,18 @@ struct move {
 typedef struct move Move;
 
 #define MAX_STR_SIZE	255
-#define WKING_START_POS	/* TODO: Starting position for the white king */
-#define BKING_START_POS	/* TODO: Starting position for the black king */
+#define WKING_START_POS	TO_POS('e','1') /* TODO: Starting position for the white king */
+#define BKING_START_POS	TO_POS('e','8') /* TODO: Starting position for the black king */
 
 #define BIT(n) 			(1UL << (n))
 #define SET_BIT(x, n)	((x) |= BIT((n)))
 #define RESET_BIT(x, n) ((x) &= ~BIT(n))
 #define IS_SET(x, n) 	((x) & BIT((n)))
-#define BOARD(x) 		/* TODO: given a player x, this macro evaluates to the player's board, i.e., 1 in dicates presense of any piece of the same color on the board, 0 indicates absense */
+#define BOARD(x) 		(x.p|x.q|x.k|x.n|x.b|x.r) /* TODO: given a player x, this macro evaluates to the player's board, i.e., 1 in dicates presense of any piece of the same color on the board, 0 indicates absense */
 #define FULL_BOARD		(BOARD(player[WHITE]) | BOARD(player[BLACK]))   /* Full board comprising of both players */
-#define OCCUPIED(n)		/* TODO: Macro to tell if a square is occupied by a piece of any color */
+#define OCCUPIED(n)		IS_SET(FULL_BOARD, (n)) /* TODO: Macro to tell if a square is occupied by a piece of any color */
+#define OCCUPIED_FP(fp, n)  IS_SET(BOARD(player[fp]), (n))
+#define OCCUPIED_SP(sp, n)  IS_SET(BOARD(player[sp]), (n))
 #define UNOCCUPIED(n)	(!(OCCUPIED(n)))
 
 #define NORTH_OF(sq)	(((sq) > 63 || (sq) < 8)? UNKNOWN_POS : ((sq)-8))
@@ -83,7 +85,7 @@ extern PlayerState player[2];
 extern PlayerColor CurrentPlayer;
 
 /* The mode in which the chess engine is operating */ 
-extern Mode mode; 
+/*extern Mode mode; */
 
 /* Given a position, find a mate in 2. */ 
 Bool run_mate2(Move *soln);
