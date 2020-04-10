@@ -18,20 +18,103 @@ void add_move(Move* move, int fr, int t, Piece p, Piece choice)
 	move = temp_move; 	    /* x->y->z->...->move->temp_move ===== now we moved forward, so we are at temp_move */ 
 }
 
+int king_thread(int j, int sp,PlayerColor c, PlayerColor enemy_c)
+{
+				int k;
+				k = j;
+				while(UNOCCUPIED(k) && RANK_OF(k) != 8) k = NORTH_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == ROOK) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && FILE_OF(k) != 'a') k = WEST_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == ROOK) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && RANK_OF(k) != 1) k = SOUTH_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == ROOK) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && FILE_OF(k) != 'h') k = EAST_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == ROOK) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && RANK_OF(k) != 8 && FILE_OF(k) != 'a') k = NW_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == BISHOP) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && RANK_OF(k) != 1 && FILE_OF(k) != 'a') k = SW_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == BISHOP) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && RANK_OF(k) != 8 && FILE_OF(k) != 'h') k = NE_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == BISHOP) return 1;
+
+				k = j;
+				while(UNOCCUPIED(k) && RANK_OF(k) != 1 && FILE_OF(k) != 'h') k = SE_OF(k);
+				if(OCCUPIED_SP(sp,k)) if(get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == BISHOP) return 1;
+
+				/* if there is an enemy_pawn at NW_OF(NORTH_OF(KING_POS)) then WHITE king cannot move to this square. */
+				k = j;
+				if(c == WHITE && RANK_OF(k) != 8 && OCCUPIED_SP(sp,NW_OF(k)) && get_piece_at(NW_OF(k), enemy_c) == PAWN) return 1;
+
+				/* if there is an enemy_pawn at NE_OF(NORTH_OF(KING_POS)) then WHITE king cannot move to this square. */
+				k = j;
+				if(c == WHITE && RANK_OF(k) != 8 && OCCUPIED_SP(sp,NE_OF(k)) && get_piece_at(NE_OF(k), enemy_c) == PAWN) return 1;
+
+				/* if there is an enemy_pawn at SW_OF(NORTH_OF(KING_POS)) then BLACK king cannot move to this square. */
+				k = j;
+				if(c == BLACK && RANK_OF(k) != 1 && OCCUPIED_SP(sp,SW_OF(k)) && get_piece_at(SW_OF(k), enemy_c) == PAWN) return 1;
+
+				/* if there is an enemy_pawn at SE_OF(NORTH_OF(KING_POS)) then BLACK king cannot move to this square. */
+				k = j;
+				if(c == BLACK && RANK_OF(k) != 1 && OCCUPIED_SP(sp,SE_OF(k)) && get_piece_at(SE_OF(k), enemy_c) == PAWN) return 1;
+
+				/* if there is an enemy_night at square NORTH_OF(WEST_OF(WEST_OF(i))), then king cannot move to this square */
+				k = j;
+				if(RANK_OF(k) != 8 && FILE_OF(k)  > 'c' && get_piece_at(NORTH_OF(WEST_OF(WEST_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k)  < 6 && FILE_OF(k) != 'a' && get_piece_at(NORTH_OF(NORTH_OF(WEST_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k)  < 6 && FILE_OF(k) != 'h' && get_piece_at(EAST_OF(NORTH_OF(NORTH_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k) != 8 && FILE_OF(k)  < 'f' && get_piece_at(EAST_OF(EAST_OF(NORTH_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k) != 1 && FILE_OF(k)  < 'f' && get_piece_at(SOUTH_OF(EAST_OF(EAST_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k)  > 3 && FILE_OF(k) != 'h' && get_piece_at(SOUTH_OF(SOUTH_OF(EAST_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k)  > 3 && FILE_OF(k) != 'a' && get_piece_at(WEST_OF(SOUTH_OF(SOUTH_OF(k))), enemy_c) == NIGHT) return 1;
+				k = j;
+				if(RANK_OF(k) != 1 && FILE_OF(k)  > 'c' && get_piece_at(WEST_OF(WEST_OF(SOUTH_OF(k))), enemy_c) == NIGHT) return 1;
+
+				/* if there is an enemy_king at square __ , then king cannot move to this square */
+				k = j;
+				if(RANK_OF(k) != 8 && get_piece_at(NORTH_OF(k), enemy_c) == KING) return 1;
+				k = j;
+				if(RANK_OF(k) != 8 && FILE_OF(k) != 'a' && get_piece_at(NW_OF(k), enemy_c) == KING) return 1;
+				k = j;
+				if(RANK_OF(k) != 8 && FILE_OF(k) != 'h' && get_piece_at(NE_OF(k), enemy_c) == KING) return 1;
+				k = j;
+				if(FILE_OF(k) != 'a' && get_piece_at(WEST_OF(k), enemy_c) == KING) return 1;
+				k = j;
+				if(FILE_OF(k) != 'h' && get_piece_at(EAST_OF(k), enemy_c) == KING) return 1;
+				k = j;
+				if(FILE_OF(k) != 'a' && RANK_OF(k) != 1 && get_piece_at(SW_OF(k), enemy_c) == KING) return 1;
+				k = j;
+				if(FILE_OF(k) != 'h' && RANK_OF(k) != 1 && get_piece_at(SE_OF(k), enemy_c) == KING) return 1;
+				return 0;
+}
+
 Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) 
 {
 	/* Your implementation */
+
 	/* Initialize the players */
 	int fp,sp,total_moves=0,i,j,k;
-	if (c == WHITE) {fp = 1; sp = 0;}
-	if (c == BLACK) {fp = 0; sp = 1;}
-	/*PlayerState player[2];*/
-	PlayerState first_player = player[fp]; PlayerState second_player = player[sp];
-
-	/* Initialize the pieces */
-	Board pawn1 = first_player.p, bishop1 = first_player.b , knight1= first_player.n , king1 = first_player.k , queen1 = first_player.q , rook1 = first_player.r;
-	Board pawn2 = second_player.p, bishop2 = second_player.b , knight2= second_player.n , king2 = second_player.k , queen2 = second_player.q , rook2 = second_player.r;
-
+	PlayerColor enemy_c;
+	if (c == WHITE) {fp = 1; sp = 0; enemy_c = BLACK;}
+	if (c == BLACK) {fp = 0; sp = 1; enemy_c = WHITE;}
+	
 	/* initialize first movement as linked list - classic linked list initialization */
 	Move* first_move = (Move*) malloc(sizeof(Move));
 	first_move->from = 0;
@@ -42,7 +125,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount)
 
 	/* loop that will check all squares */
 	for(i = 0; i <=63; i++) { /* we have 64 squares, 0-63 */
-		if(IS_SET(pawn1,i)){
+		if(IS_SET(player[fp].p,i)){
 			if(c == WHITE){
 				if( RANK_OF(i) != 8 ){
 					if( UNOCCUPIED(NORTH_OF(i)) ){
@@ -142,7 +225,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount)
 				}
 			}
 		}
-		if(IS_SET(bishop1,i)){
+		if(IS_SET(player[fp].b,i)){
 			k=i;
 			/* NW_OF */
 			while(RANK_OF(k) != 8 && FILE_OF(k) != 'a' && (!(OCCUPIED_FP(fp, NW_OF(k)))) )
@@ -200,7 +283,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount)
 				k = SE_OF(k);
 			}
 		}
-		if(IS_SET(rook1,i)){
+		if(IS_SET(player[fp].r,i)){
 			k=i;
 			/* NORTH_OF */
 			while(RANK_OF(k) != 8 && (!(OCCUPIED_FP(fp, NORTH_OF(k)))) )
@@ -258,7 +341,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount)
 				k = EAST_OF(k);
 			}
 		}
-		if(IS_SET(knight1,i)){
+		if(IS_SET(player[fp].n,i)){
 			if(RANK_OF(i) != 8 && FILE_OF(i) != 'a' && FILE_OF(i) != 'b') 
 			{
 				j=NORTH_OF(WEST_OF(WEST_OF(i))); /* A B 8 */
@@ -332,7 +415,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount)
 				}
 			}
 		}
-		if(IS_SET(queen1,i)){
+		if(IS_SET(player[fp].q,i)){
 			k=i;
 			/* NORTH_OF */
 			while(RANK_OF(k) != 8 && (!(OCCUPIED_FP(fp, NORTH_OF(k)))) )
@@ -446,38 +529,63 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount)
 				k = SE_OF(k);
 			}
 		}
-		if(IS_SET(king1,i)){
+		if(IS_SET(player[fp].k,i)){
+			int thread = 0;
 			if(RANK_OF(i) != 8 && (!(OCCUPIED_FP(fp, NORTH_OF(i)))) )
 			{
+				j = NORTH_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,NORTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(RANK_OF(i) != 1 && (!(OCCUPIED_FP(fp, SOUTH_OF(i)))) )
 			{
+				j = SOUTH_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(FILE_OF(i) != 'a' && (!(OCCUPIED_FP(fp, WEST_OF(i)))) )
 			{
+				j = WEST_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(FILE_OF(i) != 'h' && (!(OCCUPIED_FP(fp, EAST_OF(i)))) )
 			{
+				j = EAST_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(RANK_OF(i) != 8 && FILE_OF(i) != 'a' && (!(OCCUPIED_FP(fp, NW_OF(i)))) )
 			{
+				j = NW_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(RANK_OF(i) != 1 && FILE_OF(i) != 'h' && (!(OCCUPIED_FP(fp, SE_OF(i)))) )
 			{
+				j = SE_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(FILE_OF(i) != 'a' && RANK_OF(i) != 1 && (!(OCCUPIED_FP(fp, SW_OF(i)))) )
 			{
+				j = SW_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			if(FILE_OF(i) != 'h' && RANK_OF(i) != 8 && (!(OCCUPIED_FP(fp, NE_OF(i)))) )
 			{
+				j = NE_OF(i);
+				thread = king_thread(j,sp,c,enemy_c);
 
+				if(thread == 0) add_move(move,i,SOUTH_OF(i),PAWN,UNKNOWN);
 			}
 			
 		}
@@ -518,7 +626,13 @@ Bool is_draw() {
  * If there is no piece with color c, UNKNOWN is returned. */
 Piece get_piece_at(Board pos, PlayerColor c) {
     /* Your implementation */
-	return TRUE;
+	if(IS_SET(player[c].p, pos)) return PAWN;
+	if(IS_SET(player[c].k, pos)) return KING;
+	if(IS_SET(player[c].q, pos)) return QUEEN;
+	if(IS_SET(player[c].r, pos)) return ROOK;
+	if(IS_SET(player[c].n, pos)) return NIGHT;
+	if(IS_SET(player[c].b, pos)) return BISHOP;
+	return UNKNOWN;
 }
 
 /* Check if this move is trying to castle */
