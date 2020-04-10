@@ -21,7 +21,6 @@ void add_move(Move* move, int fr, int t, Piece p, Piece choice)
 Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) 
 {
 	/* Your implementation */
-
 	/* Initialize the players */
 	int fp,sp,total_moves=0,i,j,k;
 	if (c == WHITE) {fp = 1; sp = 0;}
