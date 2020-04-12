@@ -1,6 +1,7 @@
 #ifndef _REF_H_
 #define _REF_H_
 
+
 /* Types for position, board, error and boolean */
 typedef unsigned int 		Pos;
 #define UNKNOWN_POS			((unsigned int) (-1))
