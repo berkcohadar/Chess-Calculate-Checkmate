@@ -16,12 +16,14 @@ Bool is_checkmate();
  *  Error message if any, are stored in *msg. 
  * ep_square (if any) is stored in *ep_sq
  */
-Bool validate_and_move(Move *move, char **msg, PlayerColor c, Pos *ep_sq);
-
+/*Bool validate_and_move(Move *move, char **msg, PlayerColor c, Pos *ep_sq);*/
+Bool validate_and_move(Move *move, PlayerColor c);
 /* Function to decide whether the current position is a draw */
 /* Draw can be due to insufficient material, 3 move repetition or stalemate */
 	/* 3 move repetition also covers perpetual check */
 Bool is_draw();
+
+void make_move(Move *move, PlayerColor c);
 
 /* Returns the piece on a square belonging to player color c. 
  * If there is no piece with color c, UNKNOWN is returned. */

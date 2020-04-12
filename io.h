@@ -5,7 +5,7 @@
 
 void display_board();
 Bool parse_board(char *board);
-
+char* board_to_string();
 /* Parses the input move. 
  * This function repeatedly prompts for a move until a valid move is typed in. 
  * This function only validates that:

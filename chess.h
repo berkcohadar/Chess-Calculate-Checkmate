@@ -80,6 +80,7 @@ extern Pos ep_square;
 
 /* The player structures. One each for black and white */
 extern PlayerState player[2];
+extern PlayerState temp_player[2];
 
 /* The color of the current player */
 extern PlayerColor CurrentPlayer;
