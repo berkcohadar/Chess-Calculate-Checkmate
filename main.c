@@ -69,7 +69,7 @@ int main(int argc, char const *argv[]) {
          m=m->next_move;                                              /* goes to the next element in the FIRST PLAYER'S LEGAL MOVE LIST */
        }
       }
-      if (pcount1 != 0) fprintf(fa,"%s\n","-----");                   /* writes "-----" if there is no possible checkmate movements */
+      if (pcount1 != 0) fprintf(fa,"Not found\n");                   /* writes "-----" if there is no possible checkmate movements */
       /*free(m); free(m1);*/
     }
     break;
@@ -141,7 +141,7 @@ int main(int argc, char const *argv[]) {
           parse_board(real_board);
           m=m->next_move;
       }
-      if(pcount3 != 0) fprintf(fa,"-----\n");
+      if(pcount3 != 0) fprintf(fa,"Not found\n");
     }
     break;
 
