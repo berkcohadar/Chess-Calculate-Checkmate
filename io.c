@@ -94,17 +94,5 @@ char* board_to_string(){
 }
 
 void print_move(Move* m) { 
-	if(get_piece_at(m->from, 1) == QUEEN) printf("QUEEN ");
-	if(get_piece_at(m->from, 1) == KING) printf("KING ");
-	if(get_piece_at(m->from, 1) == BISHOP) printf("BISHOP ");
-	if(get_piece_at(m->from, 1) == PAWN) printf("PAWN ");
-	if(get_piece_at(m->from, 1) == ROOK) printf("ROOK ");
-	if(get_piece_at(m->from, 1) == NIGHT) printf("NIGHT ");
-	if(get_piece_at(m->from, 0) == QUEEN) printf("QUEEN ");
-	if(get_piece_at(m->from, 0) == KING) printf("KING ");
-	if(get_piece_at(m->from, 0) == BISHOP) printf("BISHOP ");
-	if(get_piece_at(m->from, 0) == PAWN) printf("PAWN ");
-	if(get_piece_at(m->from, 0) == ROOK) printf("ROOK ");
-	if(get_piece_at(m->from, 0) == NIGHT) printf("NIGHT ");
 	printf("%c%c-%c%c\n", FILE_OF(m->from), RANK_OF(m->from), FILE_OF(m->to), RANK_OF(m->to));
-} 
+}

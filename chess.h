@@ -53,9 +53,10 @@ typedef struct move Move;
 #define BOARD(x) 		(x.p|x.q|x.k|x.n|x.b|x.r) /* TODO: given a player x, this macro evaluates to the player's board, i.e., 1 in dicates presense of any piece of the same color on the board, 0 indicates absense */
 #define FULL_BOARD		(BOARD(player[WHITE]) | BOARD(player[BLACK]))   /* Full board comprising of both players */
 #define OCCUPIED(n)		IS_SET(FULL_BOARD, (n)) /* TODO: Macro to tell if a square is occupied by a piece of any color */
-#define OCCUPIED_FP(fp, n)  IS_SET(BOARD(player[fp]), (n))
-#define OCCUPIED_SP(sp, n)  IS_SET(BOARD(player[sp]), (n))
 #define UNOCCUPIED(n)	(!(OCCUPIED(n)))
+
+#define OCCUPIED_FP(fp, n)  IS_SET(BOARD(player[fp]), (n)) /* FP */
+#define OCCUPIED_SP(sp, n)  IS_SET(BOARD(player[sp]), (n)) /* SP */
 
 #define NORTH_OF(sq)	(((sq) > 63 || (sq) < 8)? UNKNOWN_POS : ((sq)-8))
 #define SOUTH_OF(sq)	(((sq) > 55)? UNKNOWN_POS: ((sq)+8))
@@ -80,7 +81,6 @@ extern Pos ep_square;
 
 /* The player structures. One each for black and white */
 extern PlayerState player[2];
-extern PlayerState temp_player[2];
 
 /* The color of the current player */
 extern PlayerColor CurrentPlayer;

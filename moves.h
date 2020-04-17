@@ -10,7 +10,7 @@
 Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount);
 
 /* Returns TRUE if the CurrentPlayer is under checkmate, FALSE otherwise. */
-Bool is_checkmate();
+Bool is_checkmate(PlayerColor c);
 
 /* Validate a move and make it. Returns TRUE if successful, FALSE if not. 
  *  Error message if any, are stored in *msg. 
@@ -34,5 +34,7 @@ unsigned int detect_castle_move(Move move, PlayerColor c);
 
 /* Perform castling. Moves king and rook and resets castle flags */
 void perform_castle(unsigned int castle, PlayerColor c);
+Bool if_castle(char c);
+char castling[8];
 
 #endif

@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "moves.h"
+#include "io.h"
+#include "chess.h"
 
 int fp_kingpos,sp_kingpos;
 
@@ -10,9 +13,9 @@ int add_move(PlayerColor c, Move** move, int fr, int t, Piece p, Piece choice) {
 	temp_move->to = t;
 	temp_move->piece = p;
 	temp_move->promotion_choice = choice;
-    if (validate_and_move(temp_move,c)) {
+    if (validate_and_move(temp_move,c)) { /* add promotion choice */
 		(*move)->next_move = temp_move; /* x->y->z->...->move->temp_move ===== we are at move */ 
-		*move = (*move)->next_move;	
+		*move = (*move)->next_move;
 		return 1;    /* x->y->z->...->move->temp_move ===== now we moved forward, so we are at temp_move */ 
 	}
 	else return 0;
@@ -38,7 +41,7 @@ int king_thread(int j, int sp,PlayerColor c, PlayerColor enemy_c) {
 		if(OCCUPIED_SP(sp,k) && (get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == ROOK) ) return 1;
 	}
 
-	if(FILE_OF(j) != 'a'){
+	if(FILE_OF(j) != 'h'){
 		k = EAST_OF(j);
 		while(UNOCCUPIED(k) && FILE_OF(k) != 'h') k = EAST_OF(k);
 		if(OCCUPIED_SP(sp,k) && (get_piece_at(k, enemy_c) == QUEEN || get_piece_at(k, enemy_c) == ROOK) ) return 1;
@@ -80,21 +83,21 @@ int king_thread(int j, int sp,PlayerColor c, PlayerColor enemy_c) {
 	if(c == BLACK && RANK_OF(k) != '1' && OCCUPIED_SP(sp,SE_OF(k)) && get_piece_at(SE_OF(k), enemy_c) == PAWN) return 1;	
 	/* if there is an enemy_night at square NORTH_OF(WEST_OF(WEST_OF(i))), then king cannot move to this square */
 	k = j;
-	if(RANK_OF(k) != '8' && FILE_OF(k)  > 'c' && get_piece_at(NORTH_OF(WEST_OF(WEST_OF(k))), enemy_c) == NIGHT) return 1;
+	if(RANK_OF(k) != '8' && FILE_OF(k)  > 'b' && get_piece_at(NORTH_OF(WEST_OF(WEST_OF(k))), enemy_c) == NIGHT) return 1;
 	k = j;
-	if(RANK_OF(k)  < '6' && FILE_OF(k) != 'a' && get_piece_at(NORTH_OF(NORTH_OF(WEST_OF(k))), enemy_c) == NIGHT) return 1;
+	if(RANK_OF(k)  < '7' && FILE_OF(k) != 'a' && get_piece_at(NORTH_OF(NORTH_OF(WEST_OF(k))), enemy_c) == NIGHT) return 1;
 	k = j;
-	if(RANK_OF(k)  < '6' && FILE_OF(k) != 'h' && get_piece_at(EAST_OF(NORTH_OF(NORTH_OF(k))), enemy_c) == NIGHT ) return 1;
+	if(RANK_OF(k)  < '7' && FILE_OF(k) != 'h' && get_piece_at(EAST_OF(NORTH_OF(NORTH_OF(k))), enemy_c) == NIGHT ) return 1;
 	k = j;
-	if(RANK_OF(k) != '8' && FILE_OF(k)  < 'f' && get_piece_at(EAST_OF(EAST_OF(NORTH_OF(k))), enemy_c) == NIGHT ) return 1;
+	if(RANK_OF(k) != '8' && FILE_OF(k)  < 'g' && get_piece_at(EAST_OF(EAST_OF(NORTH_OF(k))), enemy_c) == NIGHT ) return 1;
 	k = j;
-	if(RANK_OF(k) != '1' && FILE_OF(k)  < 'f' && get_piece_at(SOUTH_OF(EAST_OF(EAST_OF(k))), enemy_c) == NIGHT ) return 1;
+	if(RANK_OF(k) != '1' && FILE_OF(k)  < 'g' && get_piece_at(SOUTH_OF(EAST_OF(EAST_OF(k))), enemy_c) == NIGHT ) return 1;
 	k = j;
-	if(RANK_OF(k)  > '3' && FILE_OF(k) != 'h' && get_piece_at(SOUTH_OF(SOUTH_OF(EAST_OF(k))), enemy_c) == NIGHT ) return 1;
+	if(RANK_OF(k)  > '2' && FILE_OF(k) != 'h' && get_piece_at(SOUTH_OF(SOUTH_OF(EAST_OF(k))), enemy_c) == NIGHT ) return 1;
 	k = j;
-	if(RANK_OF(k)  > '3' && FILE_OF(k) != 'a' && get_piece_at(WEST_OF(SOUTH_OF(SOUTH_OF(k))), enemy_c) == NIGHT ) return 1;
+	if(RANK_OF(k)  > '2' && FILE_OF(k) != 'a' && get_piece_at(WEST_OF(SOUTH_OF(SOUTH_OF(k))), enemy_c) == NIGHT ) return 1;
 	k = j;
-	if(RANK_OF(k) != '1' && FILE_OF(k)  > 'c' && get_piece_at(WEST_OF(WEST_OF(SOUTH_OF(k))), enemy_c) == NIGHT ) return 1;	
+	if(RANK_OF(k) != '1' && FILE_OF(k)  > 'b' && get_piece_at(WEST_OF(WEST_OF(SOUTH_OF(k))), enemy_c) == NIGHT ) return 1;	
 	/* if there is an enemy_king at square __ , then king cannot move to this square */
 	k = j;
 	if(RANK_OF(k) != '8' && get_piece_at(NORTH_OF(k), enemy_c) == KING) return 1;
@@ -126,11 +129,11 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 
 	/* initialize first movement */
 	Move* first_move = (Move*) malloc(sizeof(Move));
-	*m = first_move;
+	*m= first_move;
 
 	/* loop that will check all squares */
 	for(i = 0; i <=63; i++) { /* we have 64 squares, 0-63 */
-		if(IS_SET(player[fp].p,i)){
+		if(IS_SET(player[fp].p,i)){ /* if the piece in i th square is a pawn and belongs to first player */
 			if(c == WHITE){
 				if( RANK_OF(i) != '8' ){
 					if( UNOCCUPIED(NORTH_OF(i)) ){
@@ -148,7 +151,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 							
 						}
 					}
-					if( UNOCCUPIED(NORTH_OF(NORTH_OF(i))) ){
+					if( UNOCCUPIED(NORTH_OF(NORTH_OF(i))) && UNOCCUPIED(NORTH_OF(i)) ){
 						if(RANK_OF(i) == '2') {
 							j = NORTH_OF(NORTH_OF(i));
 							total_moves += add_move(c,m,i,j,PAWN,UNKNOWN);
@@ -204,7 +207,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 							
 						}
 					}
-					if( UNOCCUPIED(SOUTH_OF(SOUTH_OF(i))) ){
+					if( UNOCCUPIED(SOUTH_OF(SOUTH_OF(i))) && UNOCCUPIED(SOUTH_OF(i))  ){
 						if(RANK_OF(i) == '7') {
 							j = SOUTH_OF(SOUTH_OF(i));
 							total_moves += add_move(c,m,i,j,PAWN,UNKNOWN);
@@ -261,7 +264,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 			}
 			k=i;
 			/* NE_OF */
-			while(RANK_OF(k) != '8' && FILE_OF(k) != 'h'  && (!(OCCUPIED_FP(fp, NE_OF(k)))) )
+			while(RANK_OF(k) != '8' && FILE_OF(k) != 'h' && (!(OCCUPIED_FP(fp, NE_OF(k)))) )
 			{
 				j = NE_OF(k);
 				
@@ -275,7 +278,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 			}
 			k=i;
 			/* SW_OF */
-			while(RANK_OF(k) != '1' && FILE_OF(k) != 'a'  && (!(OCCUPIED_FP(fp, SW_OF(k)))) )
+			while(RANK_OF(k) != '1' && FILE_OF(k) != 'a' && (!(OCCUPIED_FP(fp, SW_OF(k)))) )
 			{
 				j = SW_OF(k);
 				
@@ -289,7 +292,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 			}
 			k=i;
 			/* SE_OF */
-			while(RANK_OF(k) != '1' && FILE_OF(k) != 'h'  && (!(OCCUPIED_FP(fp, SE_OF(k)))) )
+			while(RANK_OF(k) != '1' && FILE_OF(k) != 'h' && (!(OCCUPIED_FP(fp, SE_OF(k)))) )
 			{
 				j = SE_OF(k);
 				
@@ -301,6 +304,7 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 				else total_moves += add_move(c,m, i, j, BISHOP, UNKNOWN);
 				k = SE_OF(k);
 			}
+
 		}
 		if(IS_SET(player[fp].r,i)){
 			k=i;
@@ -364,74 +368,42 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 			if(RANK_OF(i) != '8' && FILE_OF(i) != 'a' && FILE_OF(i) != 'b') 
 			{
 				j=NORTH_OF(WEST_OF(WEST_OF(i))); /* A B 8 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 			if(RANK_OF(i) != '7' && RANK_OF(i) != '8' && FILE_OF(i) != 'a') 
 			{
 				j=NORTH_OF(NORTH_OF(WEST_OF(i))); /* A 7 8 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 			if(RANK_OF(i) != '7' && RANK_OF(i) != '8' && FILE_OF(i) != 'h') 
 			{
 				j=EAST_OF(NORTH_OF(NORTH_OF(i))); /* H 7 8 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 			if(RANK_OF(i) != '8' && FILE_OF(i) != 'g' && FILE_OF(i) != 'h') 
 			{
 				j=EAST_OF(EAST_OF(NORTH_OF(i))); /* G H 8 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j)))total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 			if(RANK_OF(i) != '1' && FILE_OF(i) != 'g' && FILE_OF(i) != 'h')
 			{
 				j=SOUTH_OF(EAST_OF(EAST_OF(i))); /* G H 1 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 			if(RANK_OF(i) != '1' && RANK_OF(i) != '2' && FILE_OF(i) != 'h')
 			{
 				j=SOUTH_OF(SOUTH_OF(EAST_OF(i))); /* H 1 2 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 			if(RANK_OF(i) != '1' && RANK_OF(i) != '2' && FILE_OF(i) != 'a')
 			{
 				j=WEST_OF(SOUTH_OF(SOUTH_OF(i))); /* A 1 2 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN); 
 			}
 			if(RANK_OF(i) != '1' && FILE_OF(i) != 'a' && FILE_OF(i) != 'b')
 			{
 				j=WEST_OF(WEST_OF(SOUTH_OF(i))); /* A B 1 */
-				if(!(OCCUPIED_FP(fp, j)))
-				{
-					
-					total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
-				}
+				if(!(OCCUPIED_FP(fp, j))) total_moves += add_move(c,m,i,j,NIGHT,UNKNOWN);
 			}
 		}
 		if(IS_SET(player[fp].q,i)){
@@ -609,23 +581,51 @@ Bool legal_moves(Move **m, PlayerColor c, unsigned int *pcount) {
 			
 		}
 	}
-	first_move = first_move->next_move;
+
+	first_move = first_move->next_move; /* consider */
 	*m = first_move;
 	*pcount = total_moves; /* amount of possible movements */
 	if (*pcount > 0) return TRUE; /* total_moves > 0 */ /* if there are possible movements, return TRUE  */
 	else return FALSE; /* if there is no possible movements return FALSE */
 }
 
-Bool is_checkmate() {
-    /* Your implementation */
-	return TRUE;
+Bool is_checkmate(PlayerColor c) {
+  /* c-> Whose turn */
+  char* temp = board_to_string();
+  char temp2[330];
+  strcpy(temp2,temp);
+  Move *m;
+  unsigned int pcount;
+  legal_moves(&m, c, &pcount);
+
+  Move *m1=NULL;
+  unsigned int pcount1 = 0;
+
+  while(m!=NULL){ /* m -> first player's possible moves */
+    make_move(m,c); /*first player */
+    pcount1=0;
+    legal_moves(&m1, 1-c, &pcount1); /* m1 -> second player's possible moves */ /*second player*/
+    if (pcount1 == 0) {
+      printf("------------------------\n");
+      display_board();
+      print_move(m);
+      printf("\n !!! CHECKMATE !!! \n");
+      break;
+    }
+    else {
+      free(m1);
+      parse_board(temp2); /* returns back to board's first position */
+      m=m->next_move;
+    }
+  }
+  return TRUE;
 }
 
 Bool validate_and_move(Move *move, PlayerColor c) {
 	/*Bool validate_and_move(Move *move, char **msg, PlayerColor c, Pos *ep_sq) {*/
 	
     /* Your implementation */
-	char* temp = board_to_string();
+	char* temp = board_to_string(); /* keep our current positions at a temporary char* as string */
 	int i = move->from;
 	int j = move->to;
 	if(get_piece_at(j,1-c) != KING) {
@@ -643,22 +643,26 @@ Bool validate_and_move(Move *move, PlayerColor c) {
 			else if(IS_SET(player[1-c].k,a)) sp_kingpos = a;
 		}
 			/* returns TRUE if move is valid && reverses the movement*/
-		if(king_thread(fp_kingpos, 1-c, c, 1-c) == 0 ) { parse_board(temp); return TRUE; }
+		if( king_thread(fp_kingpos, 1-c, c, 1-c) == 0 ) { parse_board(temp); return TRUE; }
 		else { parse_board(temp); return FALSE; }
 	}
-	else { parse_board(temp); return FALSE; }
+	else return FALSE;
 }
+
 void make_move(Move *move, PlayerColor c){
 	int i = move->from;
 	int j = move->to;
-	if(move->piece == QUEEN) { RESET_BIT(player[c].q, i); SET_BIT(player[c].q, j); }
-	else if(move->piece == KING) { RESET_BIT(player[c].k, i); SET_BIT(player[c].k, j); }
-	else if(move->piece == BISHOP) { RESET_BIT(player[c].b, i); SET_BIT(player[c].b, j); }
-	else if(move->piece == NIGHT) { RESET_BIT(player[c].n, i); SET_BIT(player[c].n, j); }
-	else if(move->piece == ROOK) { RESET_BIT(player[c].r, i); SET_BIT(player[c].r, j); }
-	else if(move->piece == PAWN) { RESET_BIT(player[c].p, i); SET_BIT(player[c].p, j); }
+	if(move->promotion_choice != UNKNOWN) move->piece = move->promotion_choice;
+	if(move->piece == QUEEN) SET_BIT(player[c].q, j);
+	else if(move->piece == KING) SET_BIT(player[c].k, j);
+	else if(move->piece == BISHOP) SET_BIT(player[c].b, j);
+	else if(move->piece == NIGHT) SET_BIT(player[c].n, j);
+	else if(move->piece == ROOK) SET_BIT(player[c].r, j);
+	else if(move->piece == PAWN) SET_BIT(player[c].p, j);
+	RESET_BIT(player[c].q, i); RESET_BIT(player[c].k, i); RESET_BIT(player[c].b, i);  RESET_BIT(player[c].n, i);  RESET_BIT(player[c].r, i);  RESET_BIT(player[c].p, i); 
 	RESET_BIT(player[1-c].q ,j); RESET_BIT(player[1-c].b ,j); RESET_BIT(player[1-c].r ,j); RESET_BIT(player[1-c].p ,j); RESET_BIT(player[1-c].n ,j);RESET_BIT(player[1-c].k ,j);
 }
+
 Bool is_draw() {
     /* Your implementation */
 	return TRUE;
@@ -675,6 +679,12 @@ Piece get_piece_at(Board pos, PlayerColor c) {
 	return UNKNOWN;
 }
 
+Bool if_castle(char c){
+	/* if a given char like 'K' or 'q' found in castling; return TRUE */
+	int i;
+	for(i = 0;i<strlen(castling);i++) if (castling[i] == c) return TRUE;
+	return FALSE;
+}
 unsigned int detect_castle_move(Move move, PlayerColor c) {
     /* Your implementation */
 	return 1;
