@@ -8,7 +8,7 @@
 extern PlayerState player[2];
 
 int main(int argc, char const *argv[]) {
-  printf("\nOUR CODES DOES NOT INCKUDE CASTLE MOVEMENT AND EP-SQUARE IN THE LEGAL MOVEMENTS.\n\nLOADING THE RESULTS PLEASE WAIT...\n\n");
+  printf("\nOUR CODES DOES NOT INCLUDE CASTLE MOVEMENT AND EP-SQUARE IN THE LEGAL MOVEMENTS.\n\nLOADING THE RESULTS PLEASE WAIT...\n\n");
   /* Your testing code here. */
   char board[512]; int c;
 
@@ -33,7 +33,7 @@ int main(int argc, char const *argv[]) {
       for (i = 0; board[i] != ' '; i++) real_board[i] = board[i];     /* the board resides until ' ', the playerColor comes after the space -> ' ' */
 
       i+=1;                                                           /* goes one forward because of 'space' */
-      char currentp = board[i];                                       /* sets the currentp as 'w' or 'b' */
+      char currentp = board[i];                                       /* sets the currentplayer as 'w' or 'b' */
       if (currentp == 'w') c = 1;                                     /* sets 1 if white */
       else if (currentp == 'b') c = 0;                                /* sets 0 if black */
 
@@ -52,6 +52,7 @@ int main(int argc, char const *argv[]) {
 
       Move *m1=NULL;
       unsigned int pcount1 = 0;
+
       while(m!=NULL){                                                 /* m -> first player's possible moves */
         make_move(m,c);                                               /* make the FIRST PLAYER's move */ /* tries every possible moves again and again, in the FIRST BOARD POSITION */
 
@@ -69,14 +70,14 @@ int main(int argc, char const *argv[]) {
          m=m->next_move;                                              /* goes to the next element in the FIRST PLAYER'S LEGAL MOVE LIST */
        }
       }
-      if (pcount1 != 0) fprintf(fa,"Not found\n");                   /* writes "-----" if there is no possible checkmate movements */
-      /*free(m); free(m1);*/
+      if (pcount1 != 0) fprintf(fa,"Not found\n");                  /* writes "-----" if there is no possible checkmate movements */
+      free(m); free(m1);
     }
     break;
   case '2':
     printf("\n\nSECOND CASE COMES\n\n");
     while(fgets(board, sizeof(board), fr) != NULL){
-      char real_board[512] = {0}; int i; int j = 0;                   /* board is the whole line, but we need the first part to create the board */ 
+      char real_board[512] = {0}; int i; int j = 0;int moves_len; int counter;   /* board is the whole line, but we need the first part to create the board */ 
       if (strlen(board) < 16) fgets(board, sizeof(board), fr);
       for (i = 0; board[i] != ' '; i++) real_board[i] = board[i];     /* the board resides until ' ', the playerColor comes after the space -> ' ' */
 
@@ -95,7 +96,7 @@ int main(int argc, char const *argv[]) {
 
       Move *m;
       unsigned int pcount;
-      legal_moves(&m, c, &pcount);    
+      legal_moves(&m, c, &pcount);   /* first player move */ 
       Move *m1=NULL;
       unsigned int pcount1 = 0;      
       Move *m2=NULL;
@@ -105,11 +106,13 @@ int main(int argc, char const *argv[]) {
       while(m!=NULL){
         make_move(m,c);
         legal_moves(&m1, 1-c, &pcount1);
+        Move* temp = m1;
+        counter = 0; moves_len = 0;
+        while(temp!=NULL) {moves_len++; temp=temp->next_move;}
         while(m1!=NULL){
             char tmp_brd1[512]={0};
             char* temp_board1 = board_to_string();
             strcpy(tmp_brd1, temp_board1);
-            
             make_move(m1,1-c);
             legal_moves(&m2,1,&pcount2);
             while(m2!=NULL){
@@ -119,29 +122,28 @@ int main(int argc, char const *argv[]) {
                 make_move(m2,c);
                 legal_moves(&m3,1-c,&pcount3);
                 if(pcount3 == 0) {
-                  printf("FIRST PLAYERS MOVE; "); print_move(m);
-                  printf("SECOND PLAYERS MOVE; "); print_move(m1);
-                  printf("FIRST PLAYERS MOVE; "); print_move(m2);
-                  printf("\n\n--------------------\n\n");
-                  char result[8] = {FILE_OF(m->from),RANK_OF(m->from),'-',
-                                  FILE_OF(m->to), RANK_OF(m->to)};
-                  fprintf(fa,"%s\n",result);
+                  counter++;
+                  parse_board(tmp_brd2);
                   break;
                 }
                 else {
                   parse_board(tmp_brd2);
                   m2=m2->next_move;
                 }
-              }
-              if(pcount3 == 0) break;
-              parse_board(tmp_brd1);
-              m1=m1->next_move;
+            }
+            if(counter == moves_len) break;
+            parse_board(tmp_brd1);
+            m1=m1->next_move;
           }
-          if(pcount3 == 0) break;
+          if(counter == moves_len) break;
           parse_board(real_board);
           m=m->next_move;
-      }
-      if(pcount3 != 0) fprintf(fa,"Not found\n");
+        }
+        if(counter == moves_len){
+          char result[8] = {FILE_OF(m->from),RANK_OF(m->from),'-',FILE_OF(m->to), RANK_OF(m->to)};
+          fprintf(fa,"%s\n",result);
+        }
+        else fprintf(fa,"Not found\n");
     }
     break;
 
